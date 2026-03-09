@@ -1,6 +1,12 @@
 #Discord Bot Project
 
-Personal Discord Bot I made usinf python, and the Discord API
+Personal Discord Bot I made using Python, and the Discord API
+
+Current bot command list:
+!rps
+!flip
+!wwjd
+!joke
 
 ##Summary
 
@@ -25,3 +31,4 @@ There are many videos on Youtube going over the topic of setting up your Discord
 ##Authors
 
 @BrodyRines
+
