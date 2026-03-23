@@ -7,6 +7,22 @@ import random
 import asyncio
 import json
 import pyjokes
+import sqlite3
+
+conn = sqlite3.connect('inventory.db')
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS inventory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    skin TEXT NOT NULL,
+    wear TEXT NOT NULL,
+    pattern_index INTEGER NOT NULL              
+)
+               """)
+conn.commit()
+
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
 
@@ -46,6 +62,68 @@ async def wwjd(ctx):                            #references randomgame.json file
     await asyncio.sleep(2)
     await ctx.send(choice)
 
+async def float():
+    roll = random.uniform(.00, .52)
+    if roll <= .07:
+        wear = ('Factory New')
+    elif roll > .07 and roll < .15:
+        wear = ('Minimal Wear')
+    elif roll > .15 and roll < .37:
+        wear = ('Field Tested')
+    elif roll > .37 and roll < .44:
+        wear = ('Well Worn')
+    else:
+        wear = ('Battle Scarred')
+    return wear
+
+async def pattern():
+    index = random.randint(1, 1001)
+    return index
+
+async def open(ctx):
+    odds = random.uniform(.01, 100.01)
+    if odds <= 79.92:
+        skin = random.choice(['MP7 | Skulls', 'AUG | Wings', 'SG 553 | Ultraviolet'])
+        await ctx.send(skin)
+    elif odds > 79.92 and odds < 96:
+        skin = random.choice(['Glock-18 | Dragon Tattoo', 'USP-S | Dark Water', 'M4A1-S | Dark Water'])
+        await ctx.send(skin)
+    elif odds >= 96 and odds < 99.1:
+        skin = random.choice(['AK-47 | Case Hardened', 'Desert Eagle | Hypnotic'])
+        await ctx.send(skin)
+    elif odds > 99.1 and odds < 99.74:
+        skin = random.choice(['AWP | Lightning Strike'])
+        await ctx.send(skin)
+    else:
+        knife = random.choice(["Bayonet", "Flip", "Karambit", "M9 Bayonet", "Gut"])
+        finish = random.choice(["Fade", "Marble Fade", "Slaughter", "Case Hardened", "Blue Steel", "Stained", "Doppler", "Tiger Tooth", "Damascus Steel", "Ultraviolet"])
+        skin = (f'{knife} | {finish}')
+        await ctx.send(skin)
+    return skin 
+
+@bot.command()
+async def case(ctx):
+    i = 0 
+    while i < 4:
+        await open(ctx)
+        await asyncio.sleep(.4 * i)
+        i += 1
+    if i == 4:
+        final_skin = await open(ctx)
+        wear = await float()
+        pattern_index = await pattern()
+        await asyncio.sleep(1)
+        await ctx.send(f'You just unboxed: {final_skin} | Wear: {wear} | Pattern Index: {pattern_index}')
+        
+        user_id = ctx.author.id
+        cursor.execute(
+            """
+            INSERT INTO inventory (user_id, skin, wear, pattern_index)
+            VALUES (?, ?, ?, ?) 
+            """,
+            (user_id, final_skin, wear, pattern_index)
+        )
+        conn.commit()
 
 @bot.command()
 async def rps(ctx, choice):
@@ -74,9 +152,38 @@ async def countdown(ctx):                               #and in .5 second increm
         if word != 'shoot':
             await asyncio.sleep(0.5)
     
-    
-    
 
+@bot.command()
+async def inventory(ctx, member: discord.Member = None):
+    target = member or ctx.author
+    user_id = target.id
+    
+    cursor.execute(
+        """
+        SELECT skin, wear, pattern_index
+        FROM inventory
+        WHERE user_id = ?
+        ORDER BY id DESC
+        """,
+        (user_id,)
+    )
+    rows = cursor.fetchall()
+
+    if not rows:
+        await ctx.send(f'{target.display_name} has no items yet.')
+        return
+    
+    parts = [
+        f'{skin} ({wear}, #{pattern_index})'
+        for skin, wear, pattern_index in rows
+    ]
+
+    msg = ', '.join(parts)
+
+    if len(msg) > 1900:
+        msg = msg[:1900] + ' ...'
+    
+    await ctx.send(f"{target.display_name}'s inventory: {msg}")
 
 
 

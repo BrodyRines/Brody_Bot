@@ -31,4 +31,3 @@ There are many videos on Youtube going over the topic of setting up your Discord
 ##Authors
 
 @BrodyRines
-

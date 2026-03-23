@@ -1,0 +1,4 @@
+.env
+inventory.db
+discord.log
+__pycache__/
