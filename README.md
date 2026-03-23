@@ -7,6 +7,9 @@ Current bot command list:
 !flip
 !wwjd
 !joke
+!case
+!inventory
+
 
 ##Summary
 
@@ -31,4 +34,3 @@ There are many videos on Youtube going over the topic of setting up your Discord
 ##Authors
 
 @BrodyRines
-
