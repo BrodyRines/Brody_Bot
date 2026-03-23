@@ -7,6 +7,9 @@ Current bot command list:
 !flip
 !wwjd
 !joke
+!case
+!inventory
+
 
 ##Summary
 
